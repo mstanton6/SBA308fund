@@ -101,49 +101,65 @@ function getLearnerData(course, ag, submissions) {
         let possscores = [];
         let totscores = 0;
         let totpossscores = 0;
-        let line2out = ""
-        let line2outscores = ""
-        let line2outposs = ""
+        let line2outscores = "";
+        let line2outposs = "";
+        let line3out = [];
+        let count = 0;
+
+        if (!line3out[i]) {
+            line3out[i] = [];
+        }
 
         for (let property of LearnerSubmissions) {
 
             if (currentid !== property.learner_id) {
                 console.log(`Changing learner id's`);
+                if (!line3out[count]) {
+                    line3out[count] = "";
+                }
                 // ************************************************
                 // The learner just changed, so write out their data
-                console.log('id: ' + currentid + ','); 
+                console.log('id: ' + currentid + ',');    // line 1
                 //  avg: 0.985, // (47 + 150) / (50 + 150)
-               line2outscores = "("
-               line2outposs = "("
-                for (i=0;i<scores.length;i++) {
-                     console.log(scores[i]);
-                     console.log('possscores ' +possscores[i]);
-                     totscores += scores[i];
-                     totpossscores += possscores[i];
-                     line2outscores += String(scores[i]) + ' + ';  // build line 2 output for scores
-                     line2outposs += String(possscores[i]) + ' + ';  // build line 2 output for possible scores
-
+                line2outscores = "("
+                line2outposs = "("
+                for (i = 0; i < scores.length; i++) {
+                    console.log(scores[i]);
+                    console.log('possscores ' + possscores[i]);
+                    totscores += scores[i];
+                    totpossscores += possscores[i];
+                    line2outscores += String(scores[i]) + ' + ';  // build line 2 output for scores
+                    line2outposs += String(possscores[i]) + ' + ';  // build line 2 output for possible scores
+                    line3out[i] += String(i + 1) + ': ' + String(scores[i] / possscores[i]) + ', // ' + String(scores[i]) + " / " + String(possscores[i])
                 }
                 line2outscores += ") /"
                 line2outposs += ")"
 
                 console.log('totscores: ' + totscores);
                 console.log('totpossscores: ' + totpossscores);
-
-                console.log('avg: ' + (totscores/totpossscores) + ', // ' + line2outscores + line2outposs );
+                // line 2
+                console.log('avg: ' + (totscores / totpossscores) + ', // ' + line2outscores + line2outposs);
+                // line 3
+                // 1: 0.94, // 47 / 50
+                //Line 3 -- loop thru for line2out
+                for (i = 0; i < scores.length; i++) {
+                    console.log(line3out[i]);
+                }
 
 
                 currentid = property.learner_id;  // reset current learner id
                 tally.push([]);
                 changedlearners = true;
 
-                console.log('scores ' +scores);
+                console.log('scores ' + scores);
                 scores = [];
                 scores[i] = property.submission.score;
-                
+
                 console.log('possscores ' + possscores);
                 possscores = [];
                 possscores[i] = 150;
+
+                count += 1;
 
             } else {
                 changedlearners = false;
@@ -155,14 +171,14 @@ function getLearnerData(course, ag, submissions) {
 
             adj_score = get_adjusted_score(property.assignment_id, property.submission.submitted_at, property.submission.score);
 
-           // console.log('adj_score: ' + adj_score);
+            // console.log('adj_score: ' + adj_score);
 
-          //  if (i == 0 || changedlearners == true) {
-                tally.push([property.learner_id, property.submission.score, property.submission.submitted_at])
-          //  }
-          //  else {
-          //      tally.push([property.submission.score, property.submission.submitted_at]);
-           // }
+            //  if (i == 0 || changedlearners == true) {
+            tally.push([property.learner_id, property.submission.score, property.submission.submitted_at])
+            //  }
+            //  else {
+            //      tally.push([property.submission.score, property.submission.submitted_at]);
+            // }
 
             i++;
         }
