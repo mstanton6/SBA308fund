@@ -81,20 +81,25 @@ const LearnerSubmissions = [
         }
     }
 ];
-function get_adjusted_score(assignment_id, submitted_at, score) {
-    return score - 10;  // just a place holder for now
+function get_adjusted_score(assignment_id, due_date, points_possible) {
+
+     for (let property of AssignmentGroup.assignments) {
+        if (assignment_id == property.id){ 
+          console.log('Assignment Group: ' + property.name + ' ' + property.due_at + ' ' + property.points_possible); 
+          return [property.due_at, property.points_possible];
+        }
+     }
+      
 }
+
 
 function getLearnerData(course, ag, submissions) {
     // here, we would process this data to achieve the desired result.
 
     try {
-
-
         let adj_score;
         let tally = [];
         let i = 0;
-        let j = 0;
         let changedlearners = false;
         let currentid = LearnerSubmissions.learner_id;
         let scores = [];
@@ -113,19 +118,19 @@ function getLearnerData(course, ag, submissions) {
         for (let property of LearnerSubmissions) {
 
             if (currentid !== property.learner_id) {
-                console.log(`Changing learner id's`);
+                // console.log(`Changing learner id's`);
                 if (!line3out[count]) {
                     line3out[count] = "";
                 }
                 // ************************************************
                 // The learner just changed, so write out their data
-                console.log('id: ' + currentid + ',');    // line 1
+                console.log('id: ' + property.learner_id + ',');    // line 1
                 //  avg: 0.985, // (47 + 150) / (50 + 150)
                 line2outscores = "("
                 line2outposs = "("
                 for (i = 0; i < scores.length; i++) {
-                    console.log(scores[i]);
-                    console.log('possscores ' + possscores[i]);
+                   // console.log(scores[i]);
+                  //  console.log('possscores ' + possscores[i]);
                     totscores += scores[i];
                     totpossscores += possscores[i];
                     line2outscores += String(scores[i]) + ' + ';  // build line 2 output for scores
@@ -135,8 +140,8 @@ function getLearnerData(course, ag, submissions) {
                 line2outscores += ") /"
                 line2outposs += ")"
 
-                console.log('totscores: ' + totscores);
-                console.log('totpossscores: ' + totpossscores);
+               // console.log('totscores: ' + totscores);
+               // console.log('totpossscores: ' + totpossscores);
                 // line 2
                 console.log('avg: ' + (totscores / totpossscores) + ', // ' + line2outscores + line2outposs);
                 // line 3
@@ -151,11 +156,11 @@ function getLearnerData(course, ag, submissions) {
                 tally.push([]);
                 changedlearners = true;
 
-                console.log('scores ' + scores);
+               // console.log('scores ' + scores);
                 scores = [];
                 scores[i] = property.submission.score;
 
-                console.log('possscores ' + possscores);
+               // console.log('possscores ' + possscores);
                 possscores = [];
                 possscores[i] = 150;
 
@@ -167,10 +172,11 @@ function getLearnerData(course, ag, submissions) {
                 possscores[i] = 150;
             }
 
-            console.log(property.learner_id, property.assignment_id, property.submission.submitted_at, property.submission.score);
+         //   console.log(property.learner_id, property.assignment_id, property.submission.submitted_at, property.submission.score);
 
-            adj_score = get_adjusted_score(property.assignment_id, property.submission.submitted_at, property.submission.score);
+            const [due, poss] = get_adjusted_score(property.assignment_id, property.submission.submitted_at, property.submission.score);
 
+             console.log('due and poss ' + due + ' ' + poss);
             // console.log('adj_score: ' + adj_score);
 
             //  if (i == 0 || changedlearners == true) {
@@ -186,14 +192,14 @@ function getLearnerData(course, ag, submissions) {
         console.log('Last student scores ' + scores);
         console.log('Last student possible scores ' + possscores);
 
-        console.log('tally: ' + tally);
+      /*  console.log('tally: ' + tally);
 
         console.log('tally loop');
 
         for (let i = 0; i < tally.length; i++) {
             console.log(tally[i]);
         }
-
+      */
     }
     catch (err) {
         console.error(err);
