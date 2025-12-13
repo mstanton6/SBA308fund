@@ -99,11 +99,40 @@ function getLearnerData(course, ag, submissions) {
         let currentid = LearnerSubmissions.learner_id;
         let scores = [];
         let possscores = [];
+        let totscores = 0;
+        let totpossscores = 0;
+        let line2out = ""
+        let line2outscores = ""
+        let line2outposs = ""
 
         for (let property of LearnerSubmissions) {
 
             if (currentid !== property.learner_id) {
                 console.log(`Changing learner id's`);
+                // ************************************************
+                // The learner just changed, so write out their data
+                console.log('id: ' + currentid + ','); 
+                //  avg: 0.985, // (47 + 150) / (50 + 150)
+               line2outscores = "("
+               line2outposs = "("
+                for (i=0;i<scores.length;i++) {
+                     console.log(scores[i]);
+                     console.log('possscores ' +possscores[i]);
+                     totscores += scores[i];
+                     totpossscores += possscores[i];
+                     line2outscores += String(scores[i]) + ' + ';  // build line 2 output for scores
+                     line2outposs += String(possscores[i]) + ' + ';  // build line 2 output for possible scores
+
+                }
+                line2outscores += ") /"
+                line2outposs += ")"
+
+                console.log('totscores: ' + totscores);
+                console.log('totpossscores: ' + totpossscores);
+
+                console.log('avg: ' + (totscores/totpossscores) + ', // ' + line2outscores + line2outposs );
+
+
                 currentid = property.learner_id;  // reset current learner id
                 tally.push([]);
                 changedlearners = true;
