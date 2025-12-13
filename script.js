@@ -81,11 +81,11 @@ const LearnerSubmissions = [
         }
     }
 ];
-function get_adjusted_score(assignment_id, due_date, points_possible) {
+function get_adjusted_score(assignment_id) {
 
      for (let property of AssignmentGroup.assignments) {
         if (assignment_id == property.id){ 
-          console.log('Assignment Group: ' + property.name + ' ' + property.due_at + ' ' + property.points_possible); 
+         // console.log('Assignment Group: ' + property.name + ' ' + property.due_at + ' ' + property.points_possible); 
           return [property.due_at, property.points_possible];
         }
      }
@@ -162,21 +162,23 @@ function getLearnerData(course, ag, submissions) {
 
                // console.log('possscores ' + possscores);
                 possscores = [];
-                possscores[i] = 150;
+                let [due, poss] = get_adjusted_score(property.assignment_id);
+                possscores[i] = poss;
 
                 count += 1;
 
             } else {
                 changedlearners = false;
                 scores[i] = property.submission.score;
-                possscores[i] = 150;
+                let [due, poss] = get_adjusted_score(property.assignment_id);
+                possscores[i] = poss;
             }
 
          //   console.log(property.learner_id, property.assignment_id, property.submission.submitted_at, property.submission.score);
 
-            const [due, poss] = get_adjusted_score(property.assignment_id, property.submission.submitted_at, property.submission.score);
+            let [due, poss] = get_adjusted_score(property.assignment_id);
 
-             console.log('due and poss ' + due + ' ' + poss);
+            // console.log('due and poss ' + due + ' ' + poss);
             // console.log('adj_score: ' + adj_score);
 
             //  if (i == 0 || changedlearners == true) {
