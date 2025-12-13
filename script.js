@@ -98,6 +98,7 @@ function getLearnerData(course, ag, submissions) {
         let changedlearners = false;
         let currentid = LearnerSubmissions.learner_id;
         let scores = [];
+        let possscores = [];
 
         for (let property of LearnerSubmissions) {
 
@@ -107,10 +108,16 @@ function getLearnerData(course, ag, submissions) {
                 tally.push([]);
                 changedlearners = true;
                 console.log('scores ' +scores);
+                scores = [];
                 scores[i] = property.submission.score;
+                
+                possscores[i] = 150;
+                console.log('possscores ' + possscores);
+
             } else {
                 changedlearners = false;
                 scores[i] = property.submission.score;
+                possscores[i] = 150;
             }
 
             console.log(property.learner_id, property.assignment_id, property.submission.submitted_at, property.submission.score);
@@ -128,6 +135,8 @@ function getLearnerData(course, ag, submissions) {
 
             i++;
         }
+
+        console.log('Last student scores ' +scores);
 
         console.log('tally: ' + tally);
 
