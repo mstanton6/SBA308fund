@@ -107,12 +107,14 @@ function getLearnerData(course, ag, submissions) {
                 currentid = property.learner_id;  // reset current learner id
                 tally.push([]);
                 changedlearners = true;
+
                 console.log('scores ' +scores);
                 scores = [];
                 scores[i] = property.submission.score;
                 
-                possscores[i] = 150;
                 console.log('possscores ' + possscores);
+                possscores = [];
+                possscores[i] = 150;
 
             } else {
                 changedlearners = false;
@@ -136,7 +138,8 @@ function getLearnerData(course, ag, submissions) {
             i++;
         }
 
-        console.log('Last student scores ' +scores);
+        console.log('Last student scores ' + scores);
+        console.log('Last student possible scores ' + possscores);
 
         console.log('tally: ' + tally);
 
