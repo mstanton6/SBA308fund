@@ -94,16 +94,38 @@ function get_adjusted_score(assignment_id) {
     let due;
     let points;
 
-     for (let property of AssignmentGroup.assignments) {
-        if (assignment_id == property.id){ 
-         // console.log('Assignment Group: ' + property.name + ' ' + property.due_at + ' ' + property.points_possible); 
-           due = property.due_at;
-           points = property.points_possible;
-           break;
+    for (let property of AssignmentGroup.assignments) {
+        if (assignment_id == property.id) {
+            // console.log('Assignment Group: ' + property.name + ' ' + property.due_at + ' ' + property.points_possible); 
+            due = property.due_at;
+            points = property.points_possible;
+            break;
         }
-     }
-     return [due, points ];
-      
+    }
+    return [due, points];
+
+}
+
+function get_late_fee(submitted_at,due_at,possible) {
+
+    let subdate = "";
+    let duedate = "";
+    let latepoints = 0;
+    const late = .1;
+
+    subdate = new Date(submitted_at);
+    duedate = new Date(due_at);
+    if (subdate > duedate) {
+        console.log('assignment was late')
+    }
+
+    if (subdate > duedate) {
+        // console.log('assignment was late');
+        latepoints = late * possible;
+    }
+
+    return latepoints;
+
 }
 
 
@@ -113,9 +135,7 @@ function getLearnerData(course, ag, submissions) {
     try {
         let adj_score;
         let tally = [];
-        let i = 0;
-        let changedlearners = false;
-        let currentid; //  = LearnerSubmissions.learner_id;
+        let currentid;
         let scores = [];
         let possscores = [];
         let totscores = 0;
@@ -124,6 +144,12 @@ function getLearnerData(course, ag, submissions) {
         let line2outposs = "";
         let line3out = [];
         let count = 0;
+        let i = 0;
+        let submittedat = "";
+        let subdate = "";
+        let duedate = "";
+        const late = .1;
+
 
         if (!line3out[i]) {
             line3out[i] = [];
@@ -131,35 +157,37 @@ function getLearnerData(course, ag, submissions) {
 
         for (let property of LearnerSubmissions) {
             if (count == 0) {
-               currentid = property.learner_id;
+                currentid = property.learner_id;
             }
 
             if (currentid !== property.learner_id) {
                 // console.log(`Changing learner id's`);
-                // if (!line3out[count]) {
-                //     line3out[count] = "";
-                // }
+
                 // ************************************************
                 // The learner just changed, so write out their data
                 console.log('id: ' + currentid + ',');    // line 1
                 //  avg: 0.985, // (47 + 150) / (50 + 150)
                 line2outscores = "("
                 line2outposs = "("
-                // right here
+                line3out.length = 0;
+
                 for (i = 0; i < scores.length; i++) {
-                   // console.log(scores[i]);
-                  //  console.log('possscores ' + possscores[i]);
+                    // console.log(scores[i]);
+                    //  console.log('possscores ' + possscores[i]);
                     totscores += scores[i];
                     totpossscores += possscores[i];
                     line2outscores += String(scores[i]) + ' + ';  // build line 2 output for scores
+                    //  line2outscores += String(scores[i]) + ((i == scores.length)) ? "" : " + ";
                     line2outposs += String(possscores[i]) + ' + ';  // build line 2 output for possible scores
+
                     line3out[i] += String(i + 1) + ': ' + String(scores[i] / possscores[i]) + ', // ' + String(scores[i]) + " / " + String(possscores[i])
+
                 }
                 line2outscores += ") / "
                 line2outposs += ")"
-                
-               // console.log('totscores: ' + totscores);
-               // console.log('totpossscores: ' + totpossscores);
+
+                // console.log('totscores: ' + totscores);
+                // console.log('totpossscores: ' + totpossscores);
                 // line 2
                 console.log('avg: ' + (totscores / totpossscores) + ', // ' + line2outscores + line2outposs);
                 // line 3
@@ -168,43 +196,62 @@ function getLearnerData(course, ag, submissions) {
                 for (i = 0; i < scores.length; i++) {
                     console.log(line3out[i]);
                 }
-                i=0;
-               // tally.push([]);
-                changedlearners = true;
+                console.log(''); // line between students on the output
 
-               // console.log('scores ' + scores);
+                // Now reset
+                i = 0;
+                tally.push([]);
+
+                // console.log('scores ' + scores);
                 //scores = [];
                 scores.length = 0
-                scores[i] = property.submission.score;
+                
 
-               // console.log('possscores ' + possscores);
+                // console.log('possscores ' + possscores);
                 // possscores = [];
                 possscores.length = 0;
                 let [due, poss] = get_adjusted_score(property.assignment_id);
                 possscores[i] = poss;
-
+                submittedat = property.submission.submitted_at
+                // determine if late
+                
+                console.log('submitted at ' + submittedat + ' due ' + due);
+                let  late_fee = get_late_fee(submittedat,due,poss);
+                console.log('The late fee is: ' + late_fee);
+                const subdate = new Date(submittedat);
+                const duedate = new Date(due);
+                if (subdate > duedate) {
+                    console.log('assignment was late')
+                }
+                scores[i] = property.submission.score - late_fee;
                 // reset variables
                 totscores = 0;
                 totpossscores = 0;
-                line3out = [];
 
 
             } else {
-                changedlearners = false;
-                scores[i] = property.submission.score;
                 let [due, poss] = get_adjusted_score(property.assignment_id);
                 possscores[i] = poss;
+                //  scores[i] = property.submission.score;
+                submittedat = property.submission.submitted_at
+                // determine if late
+                console.log('submitted at ' + submittedat + ' due ' + due);
+                let  late_fee = get_late_fee(submittedat,due,poss);
+                console.log('The late fee is: ' + late_fee);
+
+                scores[i] = property.submission.score  - late_fee;
+
             }
 
-         //   console.log(property.learner_id, property.assignment_id, property.submission.submitted_at, property.submission.score);
+            //   console.log(property.learner_id, property.assignment_id, property.submission.submitted_at, property.submission.score);
 
-            let [due, poss] = get_adjusted_score(property.assignment_id);
+            // let [due, poss] = get_adjusted_score(property.assignment_id);
 
             // console.log('due and poss ' + due + ' ' + poss);
             // console.log('adj_score: ' + adj_score);
 
             //  if (i == 0 || changedlearners == true) {
-           // tally.push([property.learner_id, property.submission.score, poss,property.submission.submitted_at],due)
+            // tally.push([property.learner_id, property.submission.score, poss,property.submission.submitted_at],due)
             //  }
             //  else {
             //      tally.push([property.submission.score, property.submission.submitted_at]);
@@ -215,18 +262,18 @@ function getLearnerData(course, ag, submissions) {
             currentid = property.learner_id;  // reset current learner id
         }
         // Last student logic goes here
-     //   console.log('Last student scores ' + scores);
-      //  console.log('Last student possible scores ' + possscores);
+        //   console.log('Last student scores ' + scores);
+        //  console.log('Last student possible scores ' + possscores);
 
         // tally
-         //console.log('tally: ' + tally);
+        //console.log('tally: ' + tally);
 
         // console.log('tally loop');
 
         // for (let i = 0; i < tally.length; i++) {
         //     console.log(tally[i]);
         // }
-    
+
     }
     catch (err) {
         console.error(err);
