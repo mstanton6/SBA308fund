@@ -83,12 +83,18 @@ const LearnerSubmissions = [
 ];
 function get_adjusted_score(assignment_id) {
 
+    let due;
+    let points;
+
      for (let property of AssignmentGroup.assignments) {
         if (assignment_id == property.id){ 
          // console.log('Assignment Group: ' + property.name + ' ' + property.due_at + ' ' + property.points_possible); 
-           return [property.due_at, property.points_possible];
+           due = property.due_at;
+           points = property.points_possible;
+           break;
         }
      }
+     return [due, points ];
       
 }
 
@@ -122,15 +128,16 @@ function getLearnerData(course, ag, submissions) {
 
             if (currentid !== property.learner_id) {
                 // console.log(`Changing learner id's`);
-                if (!line3out[count]) {
-                    line3out[count] = "";
-                }
+                // if (!line3out[count]) {
+                //     line3out[count] = "";
+                // }
                 // ************************************************
                 // The learner just changed, so write out their data
                 console.log('id: ' + currentid + ',');    // line 1
                 //  avg: 0.985, // (47 + 150) / (50 + 150)
                 line2outscores = "("
                 line2outposs = "("
+
                 for (i = 0; i < scores.length; i++) {
                    // console.log(scores[i]);
                   //  console.log('possscores ' + possscores[i]);
@@ -140,7 +147,7 @@ function getLearnerData(course, ag, submissions) {
                     line2outposs += String(possscores[i]) + ' + ';  // build line 2 output for possible scores
                     line3out[i] += String(i + 1) + ': ' + String(scores[i] / possscores[i]) + ', // ' + String(scores[i]) + " / " + String(possscores[i])
                 }
-                line2outscores += ") /"
+                line2outscores += ") / "
                 line2outposs += ")"
 
                // console.log('totscores: ' + totscores);
@@ -154,7 +161,7 @@ function getLearnerData(course, ag, submissions) {
                     console.log(line3out[i]);
                 }
 
-                tally.push([]);
+               // tally.push([]);
                 changedlearners = true;
 
                // console.log('scores ' + scores);
@@ -181,7 +188,7 @@ function getLearnerData(course, ag, submissions) {
             // console.log('adj_score: ' + adj_score);
 
             //  if (i == 0 || changedlearners == true) {
-            tally.push([property.learner_id, property.submission.score, property.submission.submitted_at])
+           // tally.push([property.learner_id, property.submission.score, poss,property.submission.submitted_at],due)
             //  }
             //  else {
             //      tally.push([property.submission.score, property.submission.submitted_at]);
@@ -195,14 +202,15 @@ function getLearnerData(course, ag, submissions) {
         console.log('Last student scores ' + scores);
         console.log('Last student possible scores ' + possscores);
 
-      /*  console.log('tally: ' + tally);
+        // tally
+         //console.log('tally: ' + tally);
 
-        console.log('tally loop');
+        // console.log('tally loop');
 
-        for (let i = 0; i < tally.length; i++) {
-            console.log(tally[i]);
-        }
-      */
+        // for (let i = 0; i < tally.length; i++) {
+        //     console.log(tally[i]);
+        // }
+    
     }
     catch (err) {
         console.error(err);
