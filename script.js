@@ -86,7 +86,7 @@ function get_adjusted_score(assignment_id) {
      for (let property of AssignmentGroup.assignments) {
         if (assignment_id == property.id){ 
          // console.log('Assignment Group: ' + property.name + ' ' + property.due_at + ' ' + property.points_possible); 
-          return [property.due_at, property.points_possible];
+           return [property.due_at, property.points_possible];
         }
      }
       
@@ -116,6 +116,9 @@ function getLearnerData(course, ag, submissions) {
         }
 
         for (let property of LearnerSubmissions) {
+            if (count == 0) {
+               currentid = property.learner_id;
+            }
 
             if (currentid !== property.learner_id) {
                 // console.log(`Changing learner id's`);
@@ -124,7 +127,7 @@ function getLearnerData(course, ag, submissions) {
                 }
                 // ************************************************
                 // The learner just changed, so write out their data
-                console.log('id: ' + property.learner_id + ',');    // line 1
+                console.log('id: ' + currentid + ',');    // line 1
                 //  avg: 0.985, // (47 + 150) / (50 + 150)
                 line2outscores = "("
                 line2outposs = "("
@@ -151,8 +154,6 @@ function getLearnerData(course, ag, submissions) {
                     console.log(line3out[i]);
                 }
 
-
-                currentid = property.learner_id;  // reset current learner id
                 tally.push([]);
                 changedlearners = true;
 
@@ -164,8 +165,6 @@ function getLearnerData(course, ag, submissions) {
                 possscores = [];
                 let [due, poss] = get_adjusted_score(property.assignment_id);
                 possscores[i] = poss;
-
-                count += 1;
 
             } else {
                 changedlearners = false;
@@ -189,8 +188,10 @@ function getLearnerData(course, ag, submissions) {
             // }
 
             i++;
+            count += 1;
+            currentid = property.learner_id;  // reset current learner id
         }
-
+        // Last student logic goes here
         console.log('Last student scores ' + scores);
         console.log('Last student possible scores ' + possscores);
 
