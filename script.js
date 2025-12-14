@@ -108,6 +108,10 @@ function get_adjusted_score(assignment_id) {
 
 function get_late_fee(submitted_at,due_at,possible) {
 
+    // This function will return the late "fee" of points if the assignment is late
+    // The late fee is 10% of the points possible
+    // Otherwise, it will return 0.
+
     let subdate = "";
     let duedate = "";
     let latepoints = 0;
@@ -115,18 +119,46 @@ function get_late_fee(submitted_at,due_at,possible) {
 
     subdate = new Date(submitted_at);
     duedate = new Date(due_at);
-    if (subdate > duedate) {
-        console.log('assignment was late')
-    }
 
     if (subdate > duedate) {
-        // console.log('assignment was late');
         latepoints = late * possible;
     }
 
     return latepoints;
+}
+
+function is_assignment_due_too_far(due_at) {
+
+    // This function will return is an assignment date is too far out - true
+    // Otherwise, it will return false.
+
+    // Get the year portion of the due year in number format
+    const due_year = Number(due_at.slice(0, 4));
+
+    // Get the year portion of the current year in number format
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+
+    if (due_year > currentYear){
+        return true
+    } else {
+        return false;
+    }
+
+    // let duedate = "";
+    // const too_far_out = 30;
+
+    // duedate = new Date(due_at);
+
+    // if (duedate > Date() + too_far_out) {
+    //     return true;
+    // }
+    // else{
+    //   return false;
+    // }
 
 }
+
 
 
 function getLearnerData(course, ag, submissions) {
@@ -149,7 +181,7 @@ function getLearnerData(course, ag, submissions) {
         let subdate = "";
         let duedate = "";
         const late = .1;
-
+        let assignment_is_due = false; 
 
         if (!line3out[i]) {
             line3out[i] = [];
@@ -192,7 +224,7 @@ function getLearnerData(course, ag, submissions) {
                 console.log('avg: ' + (totscores / totpossscores) + ', // ' + line2outscores + line2outposs);
                 // line 3
                 // 1: 0.94, // 47 / 50
-                //Line 3 -- loop thru for line2out
+                //Line 3 -- loop thru for line3out
                 for (i = 0; i < scores.length; i++) {
                     console.log(line3out[i]);
                 }
@@ -215,14 +247,14 @@ function getLearnerData(course, ag, submissions) {
                 submittedat = property.submission.submitted_at
                 // determine if late
                 
-                console.log('submitted at ' + submittedat + ' due ' + due);
+              //  console.log('submitted at ' + submittedat + ' due ' + due);
                 let  late_fee = get_late_fee(submittedat,due,poss);
-                console.log('The late fee is: ' + late_fee);
-                const subdate = new Date(submittedat);
-                const duedate = new Date(due);
-                if (subdate > duedate) {
-                    console.log('assignment was late')
-                }
+                assignment_is_due = is_assignment_due_too_far(due);
+                // if (assignment_is_due == true) {
+                //     console.log('assignment_is_due is too far out ' + assignment_is_due);
+                // }
+               // console.log('The late fee is: ' + late_fee);
+
                 scores[i] = property.submission.score - late_fee;
                 // reset variables
                 totscores = 0;
@@ -235,27 +267,20 @@ function getLearnerData(course, ag, submissions) {
                 //  scores[i] = property.submission.score;
                 submittedat = property.submission.submitted_at
                 // determine if late
-                console.log('submitted at ' + submittedat + ' due ' + due);
+               // console.log('submitted at ' + submittedat + ' due ' + due);
                 let  late_fee = get_late_fee(submittedat,due,poss);
-                console.log('The late fee is: ' + late_fee);
+                assignment_is_due = is_assignment_due_too_far(due);
+            //    if (assignment_is_due == true) {
+            //        continue;
+            //    }
+                //     console.log('assignment_is_due is too far out ' + assignment_is_due);
+                // }
+               // console.log('The late fee is: ' + late_fee);
 
                 scores[i] = property.submission.score  - late_fee;
 
             }
 
-            //   console.log(property.learner_id, property.assignment_id, property.submission.submitted_at, property.submission.score);
-
-            // let [due, poss] = get_adjusted_score(property.assignment_id);
-
-            // console.log('due and poss ' + due + ' ' + poss);
-            // console.log('adj_score: ' + adj_score);
-
-            //  if (i == 0 || changedlearners == true) {
-            // tally.push([property.learner_id, property.submission.score, poss,property.submission.submitted_at],due)
-            //  }
-            //  else {
-            //      tally.push([property.submission.score, property.submission.submitted_at]);
-            // }
 
             i++;
             count += 1;
@@ -278,22 +303,6 @@ function getLearnerData(course, ag, submissions) {
     catch (err) {
         console.error(err);
     }
-
-
-    // console.log(totals)
-
-    // console.log('Neh start');
-
-    // for (let property in LearnerSubmissions) {
-    //     if (typeof property == "object") {
-    //         for (let property2 in property) {
-    //             console.log(obj[property][property2])
-    //         }
-    //     } else {
-    //         console.log(LearnerSubmissions[property])
-    //     }
-
-    // }
 
 
     // What the results should be
