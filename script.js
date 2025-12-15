@@ -92,14 +92,13 @@ const LearnerSubmissions = [
 function get_adjusted_score(assignment_id) {
 
     // This function takes the assignment_id as an input and passes back assignment due date,
-    // and the possible points for the assignment
+    // and the possible points for the assignment.
 
     let due;
     let points;
-    let thecourseid = 451;
 
     // Error checking for the AssignmentGroup belonging to its course
-    if (AssignmentGroup.course_id != thecourseid) {
+    if (AssignmentGroup.course_id != CourseInfo.id) {
         throw new Error('The Assignment Group: ' + AssignmentGroup.course_id + ' does not belong to its course ' + thecourseid + '.');
     }
 
@@ -117,11 +116,11 @@ function get_adjusted_score(assignment_id) {
 
 }
 
-function get_late_fee(submitted_at,due_at,possible) {
+function get_late_fee(submitted_at, due_at, possible) {
 
     // This function will return the late "fee" of points if the assignment is late
     // The late fee is 10% of the points possible
-    // Otherwise, it will return 0.
+    // Otherwise, if it is not late, it will return 0.
 
     let subdate = "";
     let duedate = "";
@@ -140,7 +139,7 @@ function get_late_fee(submitted_at,due_at,possible) {
 
 function is_assignment_due_too_far(due_at) {
 
-    // This function will return is an assignment date is too far out - true
+    // This function will return if an assignment date is too far out - if so, it will return true.
     // Otherwise, it will return false.
 
     // Get the year portion of the due year in number format
@@ -150,23 +149,11 @@ function is_assignment_due_too_far(due_at) {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
 
-    if (due_year > currentYear){
+    if (due_year > currentYear) {
         return true
     } else {
         return false;
     }
-
-    // let duedate = "";
-    // const too_far_out = 30;
-
-    // duedate = new Date(due_at);
-
-    // if (duedate > Date() + too_far_out) {
-    //     return true;
-    // }
-    // else{
-    //   return false;
-    // }
 
 }
 
@@ -176,7 +163,6 @@ function getLearnerData(course, ag, submissions) {
     // here, we would process this data to achieve the desired result.
 
     try {
-        let adj_score;
         let tally = [];
         let currentid;
         let scores = [];
@@ -189,10 +175,7 @@ function getLearnerData(course, ag, submissions) {
         let count = 0;
         let i = 0;
         let submittedat = "";
-        let subdate = "";
-        let duedate = "";
-        const late = .1;
-        let assignment_is_due = false; 
+        let assignment_is_due = false;
 
         if (!line3out[i]) {
             line3out[i] = [];
@@ -212,20 +195,21 @@ function getLearnerData(course, ag, submissions) {
                 //  avg: 0.985, // (47 + 150) / (50 + 150)
                 line2outscores = "("
                 line2outposs = "("
-                line3out.length = 0;
+               // line3out.length = 0;                
 
                 for (i = 0; i < scores.length; i++) {
                     // console.log(scores[i]);
                     //  console.log('possscores ' + possscores[i]);
+                    line3out[i] = "";
                     totscores += scores[i];
                     totpossscores += possscores[i];
                     line2outscores += String(scores[i]) + ' + ';  // build line 2 output for scores
                     //  line2outscores += String(scores[i]) + ((i == scores.length)) ? "" : " + ";
                     line2outposs += String(possscores[i]) + ' + ';  // build line 2 output for possible scores
-                    if (possscores[i]  == 0){  // watch out for divide by 0
-                       line3out[i] += String(i + 1) + ': ' + String(0) + ', // ' + String(scores[i]) + " / " + String(possscores[i]);
+                    if (possscores[i] == 0) {  // watch out for divide by 0
+                        line3out[i] += String(i + 1) + ': ' + String(0) + ', // ' + String(scores[i]) + " / " + String(possscores[i]);
                     }
-                    line3out[i] += String(i + 1) + ': ' + String(scores[i] / possscores[i]) + ', // ' + String(scores[i]) + " / " + String(possscores[i]);
+                    line3out[i] += String(i + 1) + ': ' + String(Math.round((scores[i] / possscores[i]) * 1000) / 1000) + ', // ' + String(scores[i]) + " / " + String(possscores[i]);
 
                 }
                 line2outscores += ") / "
@@ -234,7 +218,11 @@ function getLearnerData(course, ag, submissions) {
                 // console.log('totscores: ' + totscores);
                 // console.log('totpossscores: ' + totpossscores);
                 // line 2
-                console.log('avg: ' + (totscores / totpossscores) + ', // ' + line2outscores + line2outposs);
+                if (totpossscores == 0) { // check for divide by 0
+                    console.log('avg: ' + (0) + ', // ' + line2outscores + line2outposs);
+                } else {
+                    console.log('avg: ' + (totscores / totpossscores) + ', // ' + line2outscores + line2outposs);
+                }
                 // line 3
                 // 1: 0.94, // 47 / 50
                 //Line 3 -- loop thru for line3out
@@ -250,26 +238,26 @@ function getLearnerData(course, ag, submissions) {
                 // console.log('scores ' + scores);
                 //scores = [];
                 scores.length = 0
-                
+
 
                 // console.log('possscores ' + possscores);
                 // possscores = [];
 
                 submittedat = property.submission.submitted_at
                 // determine if late
-                
-              //  console.log('submitted at ' + submittedat + ' due ' + due);
+
+                //  console.log('submitted at ' + submittedat + ' due ' + due);
                 let [due, poss] = get_adjusted_score(property.assignment_id);
-                let  late_fee = get_late_fee(submittedat,due,poss);
+                let late_fee = get_late_fee(submittedat, due, poss);
                 assignment_is_due = is_assignment_due_too_far(due);
                 if (assignment_is_due == true) {
                     // skip the current learner's assignment, because the due date is too far out
-                    continue; 
+                    continue;
                 }
                 // if (assignment_is_due == true) {
                 //     console.log('assignment_is_due is too far out ' + assignment_is_due);
                 // }
-               // console.log('The late fee is: ' + late_fee);
+                // console.log('The late fee is: ' + late_fee);
                 possscores.length = 0;
                 possscores[i] = poss;
 
@@ -285,9 +273,9 @@ function getLearnerData(course, ag, submissions) {
                 //  scores[i] = property.submission.score;
                 submittedat = property.submission.submitted_at
                 // determine if late
-               // console.log('submitted at ' + submittedat + ' due ' + due);
-               let [due, poss] = get_adjusted_score(property.assignment_id);
-                let  late_fee = get_late_fee(submittedat,due,poss);
+                // console.log('submitted at ' + submittedat + ' due ' + due);
+                let [due, poss] = get_adjusted_score(property.assignment_id);
+                let late_fee = get_late_fee(submittedat, due, poss);
                 assignment_is_due = is_assignment_due_too_far(due);
                 if (assignment_is_due == true) {
                     // skip the current learner's assignment, because the due date is too far out
@@ -295,10 +283,10 @@ function getLearnerData(course, ag, submissions) {
                 }
                 //     console.log('assignment_is_due is too far out ' + assignment_is_due);
                 // }
-               // console.log('The late fee is: ' + late_fee);
-                
+                // console.log('The late fee is: ' + late_fee);
+
                 possscores[i] = poss;
-                scores[i] = property.submission.score  - late_fee;
+                scores[i] = property.submission.score - late_fee;
 
             }
 
@@ -307,18 +295,6 @@ function getLearnerData(course, ag, submissions) {
             count += 1;
             currentid = property.learner_id;  // reset current learner id
         }
-        // Last student logic goes here
-        //   console.log('Last student scores ' + scores);
-        //  console.log('Last student possible scores ' + possscores);
-
-        // tally
-        //console.log('tally: ' + tally);
-
-        // console.log('tally loop');
-
-        // for (let i = 0; i < tally.length; i++) {
-        //     console.log(tally[i]);
-        // }
 
     }
     catch (err) {
