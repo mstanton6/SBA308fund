@@ -176,6 +176,7 @@ function getLearnerData(course, ag, submissions) {
         let i = 0;
         let submittedat = "";
         let assignment_is_due = false;
+       // let result = {};
 
         if (!line3out[i]) {
             line3out[i] = [];
@@ -188,10 +189,12 @@ function getLearnerData(course, ag, submissions) {
 
             if (currentid !== property.learner_id) {
                 // console.log(`Changing learner id's`);
-
+                //result = "";
                 // ************************************************
                 // The learner just changed, so write out their data
-                console.log('id: ' + currentid + ',');    // line 1
+                console.log('id: ' + currentid + ',');    // ***** line 1
+             //   result = result + 'id: ' + currentid + ','
+              //  console.log('result ' + result);
                 //  avg: 0.985, // (47 + 150) / (50 + 150)
                 line2outscores = "("
                 line2outposs = "("
@@ -203,17 +206,24 @@ function getLearnerData(course, ag, submissions) {
                     line3out[i] = "";
                     totscores += scores[i];
                     totpossscores += possscores[i];
-                    line2outscores += String(scores[i]) + ' + ';  // build line 2 output for scores
-                    //  line2outscores += String(scores[i]) + ((i == scores.length)) ? "" : " + ";
-                    line2outposs += String(possscores[i]) + ' + ';  // build line 2 output for possible scores
+                  
+                    // Build the scores and possible scores
+                    if (i == scores.length -1) {
+                        line2outscores += String(scores[i])    // don't include a '+' at the end
+                        line2outposs += String(possscores[i])   // don't include a '+' at the end
+                    } else {
+                        line2outscores += String(scores[i]) + ' + ';
+                        line2outposs += String(possscores[i]) + ' + ';  // build line 2 output for possible scores
+                    }
+                                        
                     if (possscores[i] == 0) {  // watch out for divide by 0
                         line3out[i] += String(i + 1) + ': ' + String(0) + ', // ' + String(scores[i]) + " / " + String(possscores[i]);
                     }
                     line3out[i] += String(i + 1) + ': ' + String(Math.round((scores[i] / possscores[i]) * 1000) / 1000) + ', // ' + String(scores[i]) + " / " + String(possscores[i]);
 
                 }
-                line2outscores += ") / "
-                line2outposs += ")"
+               line2outscores += ") / "
+               line2outposs += ")"
 
                 // console.log('totscores: ' + totscores);
                 // console.log('totpossscores: ' + totpossscores);
@@ -231,9 +241,8 @@ function getLearnerData(course, ag, submissions) {
                 }
                 console.log(''); // line between students on the output
 
-                // Now reset
+                // Start the reset and calling functions
                 i = 0;
-
 
                 // console.log('scores ' + scores);
                 //scores = [];
@@ -244,7 +253,6 @@ function getLearnerData(course, ag, submissions) {
                 // possscores = [];
 
                 submittedat = property.submission.submitted_at
-                // determine if late
 
                 //  console.log('submitted at ' + submittedat + ' due ' + due);
                 let [due, poss] = get_adjusted_score(property.assignment_id);
