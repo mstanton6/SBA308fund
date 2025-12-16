@@ -7,6 +7,13 @@
             submitted_at: "2023-01-25",
             score: 47
 
+# Special note
+I took the output is literal and included what I think we supposed to be comments. So my code produced literally this format thru all coding:
+
+        id: 125,
+        avg: 0.985, // (47 + 150) / (50 + 150)
+        1: 0.94, // 47 / 50
+        2: 1.0 // 150 / 150
 
 # Technologies Used:
 -  javascript
